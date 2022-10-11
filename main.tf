@@ -7,6 +7,11 @@ variable subnet_cidr_block {}
 variable avail_zone {}
 variable env_prefix {} 
 variable my_ip {}
+variable instance_type {}
+variable ami {}
+  
+
+
 
 
 
@@ -57,9 +62,10 @@ resource "aws_route_table_association" "a-rtb-subnet" {
   route_table_id = aws_route_table.my-app-route-table.id
 }
 
-resource "aws_security_group" "my-app-sg" {   
+resource "aws_security_group" "myapp-security-group" {   
   vpc_id      = aws_vpc.myapp-vpc.id
   name = "myapp-sg"
+
 
   ingress {
     from_port        = 22
@@ -85,6 +91,20 @@ resource "aws_security_group" "my-app-sg" {
   tags = {
       Name = "${var.env_prefix}-sg"
   }
-
 }
+
+
+resource "aws_instance" "myapp-server" {
+  ami           = var.ami
+  instance_type = var.instance_type
+  subnet_id = aws_subnet.myapp-subnet-1.id
+  vpc_security_group_ids = [aws_security_group.myapp-security-group.id]
+  availability_zone = var.avail_zone
+
+  tags = {
+    Name = "${var.env_prefix}-server"
+  }
+}
+
+
   
