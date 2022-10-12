@@ -9,7 +9,7 @@ variable env_prefix {}
 variable my_ip {}
 variable instance_type {}
 variable ami {}
-  
+variable public_key_location {}
 
 
 
@@ -93,6 +93,11 @@ resource "aws_security_group" "myapp-security-group" {
   }
 }
 
+resource "aws_key_pair" "ssh-key" {
+  key_name   = "suse-key"
+  public_key = "${file(var.public_key_location)}"
+}
+
 
 resource "aws_instance" "myapp-server" {
   ami           = var.ami
@@ -100,6 +105,7 @@ resource "aws_instance" "myapp-server" {
   subnet_id = aws_subnet.myapp-subnet-1.id
   vpc_security_group_ids = [aws_security_group.myapp-security-group.id]
   availability_zone = var.avail_zone
+  key_name = aws_key_pair.ssh-key
 
   tags = {
     Name = "${var.env_prefix}-server"
